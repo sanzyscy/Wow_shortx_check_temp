@@ -63,6 +63,20 @@ class ResolverTests(unittest.TestCase):
         ]
         self.assertIsNone(choose_control(controls))
 
+    def test_shortx_final_get_link_candidate(self):
+        target = "https://www.mediafire.com/file/5aonm7dpeiejfcz/Sonic+TV_1.0.1.apk/file"
+        controls = [{
+            "visible": True,
+            "id": "waiting-btn",
+            "cls": "btn btn-success btn-lg get-link",
+            "text": "GET LINK",
+            "href": target,
+            "onclick": "",
+        }]
+        selected = choose_control(controls)
+        self.assertEqual(selected["external_candidate"], target)
+        self.assertEqual(selected["score"], 100)
+
     def test_priority_wp_safelink(self):
         controls = [
             {"visible": True, "id": "ad", "text": "Verify Your Loan",
