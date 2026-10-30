@@ -87,7 +87,12 @@ def get_controls(page):
         tag: e.tagName.toLowerCase(),
         id: e.id || '',
         cls: String(e.className || '').slice(0,120),
-        text: String(e.innerText || e.value || e.getAttribute('alt') || '').trim().slice(0,100),
+        text: String(e.innerText || e.value || e.getAttribute('alt') ||
+                     (e.querySelector('img') && e.querySelector('img').alt) || ''
+                    ).trim().slice(0,100),
+        image_alt: String((e.querySelector('img') && e.querySelector('img').alt) || '').slice(0,100),
+        wp_asset: !!(e.querySelector('img') &&
+           /\/wp-safelink\/assets\/(generate|target)/i.test(e.querySelector('img').src || '')),
         href: e.href || '',
         onclick: String(e.getAttribute('onclick') || '').slice(0,750),
         visible: r.width > 2 && r.height > 2 &&
@@ -114,13 +119,11 @@ def choose_control(controls):
             score = 95
         elif aid in ("get-link", "getlink", "btn-main", "skip-link"):
             score = 75
+        elif a.get("wp_asset") and re.search(
+                r"get link|download|generate|click|continue", txt):
+            score = 85
         elif ("wpsafe" in aid or "wpsafe" in cls) and re.search(
                 r"get link|download|generate|continue", txt):
-            score = 70
-        elif txt in ("get link", "generate link", "click to verify",
-                     "click here to verify"):
-            score = 35
-        elif "download link" in txt and ("wpsafe" in cls or "wpsafe" in aid):
             score = 70
         if score < 0:
             continue
@@ -263,6 +266,29 @@ def run(source: str, outdir: Path, budget: int, max_clicks: int) -> dict:
             except Exception:
                 pass
         finally:
+            # Save sanitized DOM diagnostics when an image-only control is
+            # not recognized. Never store cookie or token-bearing URLs.
+            try:
+                visible = []
+                for control in get_controls(page):
+                    if not control.get("visible"):
+                        continue
+                    visible.append({
+                        "id": control.get("id", "")[:100],
+                        "class": control.get("cls", "")[:120],
+                        "text": control.get("text", "")[:100],
+                        "image_alt": control.get("image_alt", "")[:100],
+                        "wp_asset": bool(control.get("wp_asset")),
+                        "href_without_query": short_url(control.get("href", ""))
+                        if safe_url(control.get("href", "")) else "",
+                        "has_wp_handler": "wpsafehuman" in
+                            control.get("onclick", "").lower()
+                    })
+                (outdir / "visible_controls.json").write_text(
+                    json.dumps(visible[:120], ensure_ascii=False, indent=2),
+                    encoding="utf-8")
+            except Exception as exc:
+                log("DIAGNOSTICS_UNAVAILABLE", page.url, type(exc).__name__)
             context.close()
             browser.close()
     return report
