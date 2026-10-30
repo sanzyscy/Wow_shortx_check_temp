@@ -87,7 +87,7 @@ def get_controls(page):
         tag: e.tagName.toLowerCase(),
         id: e.id || '',
         cls: String(e.className || '').slice(0,120),
-        text: String(e.innerText || e.value || e.getAttribute('alt') ||
+        text: String((e.innerText || '').trim() || e.value || e.getAttribute('alt') ||
                      (e.querySelector('img') && e.querySelector('img').alt) || ''
                     ).trim().slice(0,100),
         image_alt: String((e.querySelector('img') && e.querySelector('img').alt) || '').slice(0,100),
@@ -303,8 +303,8 @@ def save_report(report: dict, outdir: Path) -> None:
     lines = [
         "# ShortxLinks: результат перевірки", "",
         f"- **Статус:** {report['status']}",
-        f"- **Початкова адреса:** \`{report['source']}\`",
-        f"- **Кандидат на кінцеву адресу:** \`{dest}\`",
+        f"- **Початкова адреса:** `{report['source']}`",
+        f"- **Кандидат на кінцеву адресу:** `{dest}`",
         f"- **Пояснення:** {report.get('reason', '—')}", "",
         "Кандидат не означає перевірений або безпечний кінцевий URL.",
         "Скрипт не завантажує кінцевий файл і не долає CAPTCHA.", ""
