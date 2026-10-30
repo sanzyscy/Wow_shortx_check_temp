@@ -1,0 +1,46 @@
+name: MediaFire Direct URL Probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: mediafire-direct-manual
+  cancel-in-progress: false
+
+jobs:
+  inspect:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 4
+    steps:
+      - name: Checkout own source only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      - name: Test extraction logic offline
+        run: python3 -m unittest discover -s tests -v
+
+      - name: Install official browser automation
+        run: |
+          python3 -m venv .venv
+          .venv/bin/python -m pip install --disable-pip-version-check --no-cache-dir 'playwright==1.64.1'
+          google-chrome --version
+
+      - name: Read public MediaFire download button without downloading APK
+        run: |
+          .venv/bin/python mediafire_probe.py \
+            --url 'https://www.mediafire.com/file/5aonm7dpeiejfcz/Sonic+TV_1.0.1.apk/file' \
+            --seconds 25 \
+            --out mediafire_result
+
+      - name: Save report for one day
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mediafire-direct-report
+          path: mediafire_result/
+          if-no-files-found: warn
+          retention-days: 1
