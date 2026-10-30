@@ -45,6 +45,24 @@ class ResolverTests(unittest.TestCase):
         }]
         self.assertIsNone(choose_control(controls))
 
+    def test_wp_image_button_recognized(self):
+        controls = [
+            {"visible": True, "id": "", "cls": "",
+             "text": "GENERATE LINK", "image_alt": "GENERATE LINK",
+             "wp_asset": True, "href": "https://mtc1.rbprompt.in",
+             "onclick": ""}
+        ]
+        self.assertEqual(choose_control(controls)["index"], 0)
+
+    def test_fake_generate_link_ad_rejected(self):
+        controls = [
+            {"visible": True, "id": "", "cls": "",
+             "text": "GENERATE LINK", "image_alt": "GENERATE LINK",
+             "wp_asset": False, "href": "https://ads.example.com",
+             "onclick": ""}
+        ]
+        self.assertIsNone(choose_control(controls))
+
     def test_priority_wp_safelink(self):
         controls = [
             {"visible": True, "id": "ad", "text": "Verify Your Loan",
