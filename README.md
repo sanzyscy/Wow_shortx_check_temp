@@ -23,3 +23,16 @@
 - `.github/workflows/shortx-own.yml` — одноразовий ручний запуск у GitHub Actions
 
 Обмеження: до 10 кліків, до 225 секунд перевірки, 8 хвилин на всю job. Результат не гарантується.
+## Окремо: прямий URL з MediaFire
+
+Після розкриття `8ciL1` знайшли сторінку `Sonic TV 1.0.1.apk` на MediaFire.
+
+Новий власний модуль `mediafire_probe.py` перевіряє **тільки цю конкретну сторінку**. Він не натискає кнопку завантаження, не виконує запит до APK і не зберігає APK. Він лише читає `href` кнопки `#downloadButton` і перевіряє, чи URL належить серверу `downloadNNNN.mediafire.com`.
+
+### Запуск зі смартфона
+1. Відкрий **Actions → MediaFire Direct URL Probe**.
+2. Вибери **Run workflow → Run workflow**, гілка `main`.
+3. Після завершення відкрий **Artifacts → mediafire-direct-report**.
+4. Шукай `RESULT_UA.md` або `result.json`.
+
+Якщо статус `candidate`, скрипт знайшов ймовірний прямий URL. **Він не перевіряв завантаження, вміст APK чи безпечність.** Адреса може бути тимчасовою.
