@@ -117,6 +117,9 @@ def choose_control(controls):
             score = 100
         elif "safelink_redirect=" in href or "safelink_redirect=" in onclick:
             score = 95
+        elif (aid == "waiting-btn" and "get-link" in cls and
+              txt == "get link"):
+            score = 100
         elif aid in ("get-link", "getlink", "btn-main", "skip-link"):
             score = 75
         elif a.get("wp_asset") and re.search(
